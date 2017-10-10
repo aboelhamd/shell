@@ -6,4 +6,4 @@ const int TYPE_ECHO = 4;
 const int TYPE_EXPRESSION = 5;
 const int TYPE_COMMENT = 6;
 const int TYPE_HISTORY = 7;
-
+const int TYPE_EXIT = 8;

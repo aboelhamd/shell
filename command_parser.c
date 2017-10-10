@@ -82,7 +82,15 @@ int is_echo( char command[] ){
 }
 
 int is_history( char command[] ){
-	return !strcmp(command,"history");
+	char* regex_str = "^\\s*history\\s*$";
+
+	return matches(regex_str,command);
+}
+
+int is_exit( char command[] ){
+	char* regex_str = "^\\s*exit\\s*$";
+
+	return matches(regex_str,command);
 }
 
 int is_command_path( char command[] ){
@@ -99,7 +107,6 @@ char** clean_command( char command[] , int cmdType , int foreground ){
 	if(!foreground){
 		// make the last string null
 		res[sizeof res*4/sizeof res[0]-2] = '\0';
-//		printf("here  %d\n",sizeof res*4/sizeof res[0]-2);
 	}
 
 	if((cmdType==TYPE_CD)|(cmdType==TYPE_ECHO)){
@@ -110,13 +117,15 @@ char** clean_command( char command[] , int cmdType , int foreground ){
 }
 
 char** parse_command( char command[] , int* cmdType , int* foreground , int* lookup){
-	// These 3 types do not need lookup for variables
+	// These 4 types do not need lookup for variables
 	if(is_comment(command)){
 		*cmdType = TYPE_COMMENT;
 	}else if(is_exp(command)){
 		*cmdType = TYPE_EXPRESSION;
 	}else if(is_history(command)){
 		*cmdType = TYPE_HISTORY;
+	}else if(is_exit(command)){
+		*cmdType = TYPE_EXIT;
 	}
 	// These 3 types may be need look up for variables
 	else if(is_command_path(command)){
