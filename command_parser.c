@@ -8,55 +8,6 @@
 #include <unistd.h>
 #include <strings.h>
 
-char** parse_command( char command[] , int* cmdType , int* ground , int* exp_eval)
-{
-
-	if(is_comment(command)){
-		cmdType = TYPE_COMMENT;
-	}else if(is_exp(command)){
-		cmdType = TYPE_EXPRESSION;
-	}else if(is_history(command)){
-		cmdType = TYPE_EXPRESSION;
-	}else {
-		if(is_command_path(command)){
-			cmdType = TYPE_CMD_PATH;
-		}else if(is_cd(command)){
-			cmdType = TYPE_CD;
-		}
-		else if(is_ech(command)){
-			cmdType = TYPE_CD;
-		}
-		else if(is_cd(command)){
-			cmdType = TYPE_CD;
-		}
-	}
-
-    	/* if first char is # , then it's a comment
-    	 we ignore the whole command
-
-    	 if first char is / , then it's the command path
-    	 we send it to expression function */
-
-
-    	/* if p == cd
-    	 we send it to expression function
-
-    	 if p == history
-
-    	 if p == printenv
-
-    	 if p == exit
-
-    	 if p == echo
-    	 we send it to expression function*/
-
-    	/* if p has = then it's an expression
-    	 if p has $ then it's and expression evaluation */
-
-    }
-
-	return NULL;
-}
 
 char** split( char* str )
 {
@@ -121,17 +72,15 @@ char *trim(char *str)
     return str;
 }
 
-int need_exp_eval( char command[] ){
+int need_lookup( char command[] ){
 	int error;
 	regex_t regex;
-	char cmd_copy[strlen(command)];
-	strcpy(cmd_copy,command);
 
 	error = regcomp(&regex,"\\$[a-zA-Z_][a-zA-Z0-9_]*",REG_EXTENDED);
 
 
 	if(!error){
-		error = regexec(&regex, cmd_copy , (size_t)0 , NULL , 0);
+		error = regexec(&regex, command , (size_t)0 , NULL , 0);
 	}
 
 	regfree(&regex);
@@ -179,19 +128,81 @@ int is_command_path( char command[] ){
 	return command[0] == '/';
 }
 
+char** parse_command( char command[] , int* cmdType , int* foreground , int* lookup)
+{
+	// remove heading and trailing spaces
+	trim(command);
+
+	// These 3 types do not need lookup for variables
+	if(is_comment(command)){
+		*cmdType = TYPE_COMMENT;
+	}else if(is_exp(command)){
+		*cmdType = TYPE_EXPRESSION;
+	}else if(is_history(command)){
+		*cmdType = TYPE_HISTORY;
+	}else {
+		// These 3 types do need look up for variables
+		if(is_command_path(command)){
+			*cmdType = TYPE_CMD_PATH;
+		}else if(is_cd(command)){
+			*cmdType = TYPE_CD;
+		}
+		else if(is_echo(command)){
+			*cmdType = TYPE_ECHO;
+		}
+		else {
+			*cmdType = TYPE_CMD;
+		}
+	}
+
+	// need lookup
+	*lookup = need_lookup(command);
+	// foreground or background
+	*foreground = is_foreground(command);
+	// remove "&" from the command if it's found
+	if(!(*foreground)) command[strlen(command)-1]=0;
+
+
+
+    	/* if first char is # , then it's a comment
+    	 we ignore the whole command
+
+    	 if first char is / , then it's the command path
+    	 we send it to expression function */
+
+
+    	/* if p == cd
+    	 we send it to expression function
+
+    	 if p == history
+
+    	 if p == printenv
+
+    	 if p == exit
+
+    	 if p == echo
+    	 we send it to expression function*/
+
+    	/* if p has = then it's an expression
+    	 if p has $ then it's and expression evaluation */
+
+	return split(command);
+}
+
+
 
 int main (void)
 {
 	char str[] = "    x12=4     &  ";
 
-	printf("%s\n",trim(str));
-
-	printf("%d\n",need_exp_eval(str));
-	printf("%d\n",is_exp(str));
-	printf("%d\n",is_foreground(str));
-	printf("%d\n",is_comment(str));
-	printf("%d\n",is_command_path(str));
-	//int cmdType=-1, ground=-1;
+//	printf("%s\n",trim(str));
+//
+//	printf("%d\n",need_exp_eval(str));
+//	printf("%d\n",is_exp(str));
+//	printf("%d\n",is_foreground(str));
+//	printf("%d\n",is_comment(str));
+//	printf("%d\n",is_command_path(str));
+	int cmdType=-1, ground=-1, lookup=-1;
 
 
 
@@ -200,7 +211,7 @@ int main (void)
 
 	//printf("%d   %d\n",cmdType, ground);
 
-	char** res =  split(str);
+	char** res =  parse_command(str,&cmdType,&ground,&lookup);
 	if(res){
         int i = 0;
         while (res[i]){
@@ -208,6 +219,8 @@ int main (void)
             i++;
         }
     }
+	printf("Hello\n");
+	printf("%d  %d  %d\n",cmdType,ground,lookup);
 
 	/*//execv(res[0],res);
     printf("%d\n",execv("/bin/echo",res));

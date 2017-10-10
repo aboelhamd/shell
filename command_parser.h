@@ -13,7 +13,7 @@
 	- Best practice is to use helper function for each collection of logical instructions,
 	  example: function for splitting the command by space into array of strings, ..etc
 */
-char** parse_command( char str[] , int* cmdType , int* ground , int* exp_eval);
+char** parse_command( char str[] , int* cmdType , int* foreground , int* lookup);
 
 
 #endif // COMMAND_PARSER_H
