@@ -19,7 +19,6 @@ char** split( char str[] )
 	int i = 0;
 	// split string and append tokens to 'res'
 	while (p){
-		printf("%s\n",p);
 
 		res[i] = p;
 		i++;
