@@ -4,62 +4,37 @@
 #include <unistd.h>
 #include <wait.h>
 #include "command_parser.h"
+#include "constants.h"
+#include "environment.h"
+#include "variables.h"
 
 typedef enum {
 	false = 0, true = 1
 } bool;
 
 void start(bool read_from_file);
-void shell_loop(bool input_from_file);
+
+void shell_loop(bool input_from_file, char line[512], char** command,
+		int cmdType, int foreground, int lookup);
 
 int main(int argc, char *argv[]) {
-	printf("Hello World\n");
-//    setup_environment();
+	char** commands = malloc((size_t) 5);
+	memset(commands, 0, 5);
 
-	char line[512];
-	char** command;
-	int cmdType, foreground, lookup;
+	setenv("x", "/hello.c", 1);
 
-	while (1) {
-		if (fgets(line, 512, stdin)) {
-			line[strcspn(line, "\n")] = 0;
-		}
+	commands[0] = "cd";
+	commands[1] = "/home/aboelhamd$HOME$x";
 
-		command = parse_command(line, &cmdType, &foreground, &lookup);
+//	printf("%d\n",strlen(commands[0]));
 
-		pid_t child_pid;
-		int child_status;
+	lookup_variables(commands);
 
-		child_pid = fork();
-		if (child_pid == 0) {
-			/* This is done by the child process. */
-
-			execvp(command[0], command);
-
-			/* If execv returns, it must have failed. */
-
-			printf("Unknown command\n");
-			exit(0);
-		} else {
-			/* This is run by the parent.  Wait for the child
-			 to terminate. */
-			pid_t tpid;
-			do {
-				tpid = wait(&child_status);
-//				if(tpid != child_pid) process_terminated(tpid);
-			} while (tpid != child_pid);
-
-			printf("command has executed\n");
-			//return child_status;
-		}
+	int i = 0;
+	while (commands[i]) {
+		printf("%s\n", commands[i]);
+		i++;
 	}
-
-//    if( argc > 1 ){
-//        start(true);
-//    }
-//    else{
-//        start(false);
-//    }
 
 	return 0;
 }
@@ -70,14 +45,14 @@ void start(bool read_from_file) {
 	if (read_from_file) {
 		// file processing functions should be called from here
 
-		shell_loop(true);
+//		shell_loop(true);
 	} else {
-		shell_loop(false);
+//		shell_loop(false);
 	}
 }
 
 void shell_loop(bool input_from_file, char line[512], char** command,
-		int cmdType, foreground, lookup) {
+		int cmdType, int foreground, int lookup) {
 
 	bool from_file = input_from_file;
 
@@ -96,36 +71,34 @@ void shell_loop(bool input_from_file, char line[512], char** command,
 		// parsing the command
 		command = parse_command(line, &cmdType, &foreground, &lookup);
 
-		if(cmdType == TYPE_EXIT){
+		if (cmdType == TYPE_EXIT) {
 			// exit
 			exit(0);
-		}else if (cmdType == TYPE_COMMENT){
+		} else if (cmdType == TYPE_COMMENT) {
 			// do nothing
 			return;
-		}else if (cmdType == TYPE_HISTORY){
+		} else if (cmdType == TYPE_HISTORY) {
 			// print history
-		}else if (cmdType == TYPE_EXPRESSION){
+		} else if (cmdType == TYPE_EXPRESSION) {
 			// save variable in table
-		}else {
+		} else {
 			// do lookup
 
-			if (cmdType == TYPE_CD){
+			if (cmdType == TYPE_CD) {
 				// do it in parent process
-			}else if (cmdType == TYPE_ECHO){
+			} else if (cmdType == TYPE_ECHO) {
 				// we want to print the whole string as it is
 				// in parent process too
-			}else if (cmdType == TYPE_CMD_PATH){
+			} else if (cmdType == TYPE_CMD_PATH) {
 				// execv(command[0],command);
-			}else if (cmdType == TYPE_CMD){
+			} else if (cmdType == TYPE_CMD) {
 				// execv(path + command[0],command);
 				// we try each directory in the path
 			}
 		}
 
-
 		pid_t child_pid;
 		int child_status;
-
 
 		child_pid = fork();
 		if (child_pid == 0) {

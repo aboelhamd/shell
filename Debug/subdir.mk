@@ -6,6 +6,7 @@
 C_SRCS += \
 ../command_parser.c \
 ../commands.c \
+../constants.c \
 ../environment.c \
 ../file_processing.c \
 ../main.c \
@@ -14,6 +15,7 @@ C_SRCS += \
 OBJS += \
 ./command_parser.o \
 ./commands.o \
+./constants.o \
 ./environment.o \
 ./file_processing.o \
 ./main.o \
@@ -22,6 +24,7 @@ OBJS += \
 C_DEPS += \
 ./command_parser.d \
 ./commands.d \
+./constants.d \
 ./environment.d \
 ./file_processing.d \
 ./main.d \

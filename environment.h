@@ -11,4 +11,6 @@
 */
 void setup_environment( void );
 
+char* get_project_path( );
+
 #endif // ENVIRONMENT_H_
