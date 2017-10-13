@@ -14,30 +14,18 @@ typedef enum {
 
 void start(bool read_from_file);
 
-void shell_loop(bool input_from_file, char line[512], char** command,
-		int cmdType, int foreground, int lookup);
+void shell_loop(bool input_from_file, char line[512]);
 
-int main(int argc, char *argv[]) {
-	char** commands = malloc((size_t) 5);
-	memset(commands, 0, 5);
-
-	setenv("x", "/hello.c", 1);
-
-	commands[0] = "cd";
-	commands[1] = "/home/aboelhamd$HOME$x";
-
-//	printf("%d\n",strlen(commands[0]));
-
-	lookup_variables(commands);
-
-	int i = 0;
-	while (commands[i]) {
-		printf("%s\n", commands[i]);
-		i++;
-	}
-
-	return 0;
-}
+//int main(int argc, char *argv[]) {
+//	bool input_from_file = false;
+//	char line[512];
+//	char** command = NULL;
+//	int cmdType = -1, foreground = -1, lookup = -1;
+//
+//	shell_loop(input_from_file, line, command, cmdType, foreground, lookup);
+//
+//	return 0;
+//}
 
 void start(bool read_from_file) {
 	cd(""); // let shell starts from home
@@ -51,8 +39,7 @@ void start(bool read_from_file) {
 	}
 }
 
-void shell_loop(bool input_from_file, char line[512], char** command,
-		int cmdType, int foreground, int lookup) {
+void shell_loop(bool input_from_file, char line[512]) {
 
 	bool from_file = input_from_file;
 
@@ -63,13 +50,15 @@ void shell_loop(bool input_from_file, char line[512], char** command,
 			// if end of file {from_file = false; continue;}
 		} else {
 			//read next instruction from console
+			printf("shell : ");
 			if (fgets(line, 512, stdin)) {
 				line[strcspn(line, "\n")] = 0;
 			}
 		}
 
-		// parsing the command
-		command = parse_command(line, &cmdType, &foreground, &lookup);
+		// get command type
+		int cmdType = get_cmd_type(line);
+
 
 		if (cmdType == TYPE_EXIT) {
 			// exit
@@ -79,16 +68,17 @@ void shell_loop(bool input_from_file, char line[512], char** command,
 			return;
 		} else if (cmdType == TYPE_HISTORY) {
 			// print history
-		} else if (cmdType == TYPE_EXPRESSION) {
-			// save variable in table
 		} else {
-			// do lookup
 
-			if (cmdType == TYPE_CD) {
-				// do it in parent process
+			// do lookup
+			char* new_line = command_lookup(line);
+
+			if (cmdType == TYPE_EXPRESSION) {
+				set_variable(new_line);
+			} else if (cmdType == TYPE_CD) {
+				cd(new_line);
 			} else if (cmdType == TYPE_ECHO) {
-				// we want to print the whole string as it is
-				// in parent process too
+				echo(new_line);
 			} else if (cmdType == TYPE_CMD_PATH) {
 				// execv(command[0],command);
 			} else if (cmdType == TYPE_CMD) {
@@ -104,7 +94,7 @@ void shell_loop(bool input_from_file, char line[512], char** command,
 		if (child_pid == 0) {
 			// This is done by the child process
 
-			execvp(command[0], command);
+//			execvp(command[0], command);
 
 			// If execv returns, it must have failed.
 

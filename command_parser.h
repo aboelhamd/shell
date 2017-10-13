@@ -1,19 +1,14 @@
 #ifndef COMMAND_PARSER_H   /* Include guard */
 #define COMMAND_PARSER_H
 
-/*
-	- This function should be responsible for importing all details of the command
-	- Should specify the type of the command "comment, cd, echo, expression - X=5 -, else"
-	- Should specify the arguments of the command
-	- Should specify if the command is background or foreground
-	- Should consider all parsing special cases, example: many spaces in  "ls     -a"
+// method to return the type of command from the 8 types in constants
+int get_cmd_type(char command[]);
 
-	- You're left free to decide how to return your imported details of this command
+// method to split an array by a specific delimiter
+char** split(char str[], char delimiter[]);
 
-	- Best practice is to use helper function for each collection of logical instructions,
-	  example: function for splitting the command by space into array of strings, ..etc
-*/
-char** parse_command( char str[] , int* cmdType , int* foreground , int* lookup);
-
+// method to determine if a command is to be done
+// in foreground or background
+int is_foreground(char command[]);
 
 #endif // COMMAND_PARSER_H

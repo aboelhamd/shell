@@ -1,10 +1,12 @@
 #ifndef VARIABLES_H_   /* Include guard */
 #define VARIABLES_H_
 
-// This method takes an array of strings (which was parsed earlier)
-// and lookup for every variable in it and replace them with their values
-void lookup_variables(char** command);
+// This method takes a string and look up for variables in it
+char* command_lookup(char old_str[]);
 
+// This method takes the expression string "x=$HOME"
+// and save the variable with the new value
+void set_variable(char expression[]);
 
 void print_all_variables(void);
 
