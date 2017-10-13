@@ -12,4 +12,10 @@ int cd(char command[]);
  */
 void echo(char command[]);
 
+/*
+ - This function should be responsible for implementing shell commands without
+ - their path
+ */
+void cmd_no_path(char** command);
+
 #endif // COMMANDS_H_

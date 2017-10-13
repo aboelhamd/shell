@@ -16,16 +16,14 @@ void start(bool read_from_file);
 
 void shell_loop(bool input_from_file, char line[512]);
 
-//int main(int argc, char *argv[]) {
-//	bool input_from_file = false;
-//	char line[512];
-//	char** command = NULL;
-//	int cmdType = -1, foreground = -1, lookup = -1;
-//
-//	shell_loop(input_from_file, line, command, cmdType, foreground, lookup);
-//
-//	return 0;
-//}
+int main(int argc, char *argv[]) {
+	bool input_from_file = false;
+	char line[512];
+
+	shell_loop(input_from_file, line);
+
+	return 0;
+}
 
 void start(bool read_from_file) {
 	cd(""); // let shell starts from home
@@ -59,13 +57,11 @@ void shell_loop(bool input_from_file, char line[512]) {
 		// get command type
 		int cmdType = get_cmd_type(line);
 
-
 		if (cmdType == TYPE_EXIT) {
 			// exit
 			exit(0);
 		} else if (cmdType == TYPE_COMMENT) {
 			// do nothing
-			return;
 		} else if (cmdType == TYPE_HISTORY) {
 			// print history
 		} else {
@@ -79,39 +75,41 @@ void shell_loop(bool input_from_file, char line[512]) {
 				cd(new_line);
 			} else if (cmdType == TYPE_ECHO) {
 				echo(new_line);
-			} else if (cmdType == TYPE_CMD_PATH) {
-				// execv(command[0],command);
-			} else if (cmdType == TYPE_CMD) {
-				// execv(path + command[0],command);
-				// we try each directory in the path
+			} else {
+				// execute in a child process
+				pid_t child_pid;
+				int child_status;
+
+				child_pid = fork();
+				if (child_pid == 0) {
+					// This is done by the child process
+
+					// split the line by space
+					char ** command = split(new_line, "\\s");
+
+					if (cmdType == TYPE_CMD_PATH) {
+						execv(command[0], command);
+					} else if (cmdType == TYPE_CMD) {
+						cmd_no_path(command);
+					}
+
+					printf("Unknown command\n");
+					exit(0);
+				} else {
+					// This is run by the parent.  Wait for the child
+					// to terminate
+
+					pid_t tpid;
+					do {
+						tpid = wait(&child_status);
+						//if(tpid != child_pid) process_terminated(tpid);
+					} while (tpid != child_pid);
+
+					printf("child has finished\n");
+					//return child_status;
+				}
 			}
 		}
 
-		pid_t child_pid;
-		int child_status;
-
-		child_pid = fork();
-		if (child_pid == 0) {
-			// This is done by the child process
-
-//			execvp(command[0], command);
-
-			// If execv returns, it must have failed.
-
-			printf("Unknown command\n");
-			exit(0);
-		} else {
-			// This is run by the parent.  Wait for the child
-			// to terminate
-
-			pid_t tpid;
-			do {
-				tpid = wait(&child_status);
-				//if(tpid != child_pid) process_terminated(tpid);
-			} while (tpid != child_pid);
-
-			printf("child has finished\n");
-			//return child_status;
-		}
 	}
 }
