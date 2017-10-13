@@ -7,6 +7,8 @@
 #include "constants.h"
 #include "environment.h"
 #include "variables.h"
+#include "commands.h"
+#include "file_processing.h"
 
 typedef enum {
 	false = 0, true = 1
@@ -17,6 +19,7 @@ void start(bool read_from_file);
 void shell_loop(bool input_from_file, char line[512]);
 
 int main(int argc, char *argv[]) {
+	setup_environment();
 	bool input_from_file = false;
 	char line[512];
 
@@ -54,6 +57,10 @@ void shell_loop(bool input_from_file, char line[512]) {
 			}
 		}
 
+//		printf("Hello\n");
+		// add command to history
+		write_to_history(line);
+
 		// get command type
 		int cmdType = get_cmd_type(line);
 
@@ -63,7 +70,7 @@ void shell_loop(bool input_from_file, char line[512]) {
 		} else if (cmdType == TYPE_COMMENT) {
 			// do nothing
 		} else if (cmdType == TYPE_HISTORY) {
-			// print history
+			print_history();
 		} else {
 
 			// do lookup
@@ -85,7 +92,7 @@ void shell_loop(bool input_from_file, char line[512]) {
 					// This is done by the child process
 
 					// split the line by space
-					char ** command = split(new_line, "\\s");
+					char ** command = split(new_line, " \t");
 
 					if (cmdType == TYPE_CMD_PATH) {
 						execv(command[0], command);

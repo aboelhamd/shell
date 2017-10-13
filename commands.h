@@ -18,4 +18,9 @@ void echo(char command[]);
  */
 void cmd_no_path(char** command);
 
+/*
+ - This function prints the previous commands
+ */
+void print_history();
+
 #endif // COMMANDS_H_

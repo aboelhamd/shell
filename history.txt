@@ -1,0 +1,14 @@
+ls
+cd ~
+pwd
+exit
+x="azbcds"
+echo $x
+echo $HOME
+echo $PATH
+x=abcdefg
+echo $x
+exit
+cd ~
+pwd
+exit

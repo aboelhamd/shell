@@ -4,10 +4,11 @@
 #include <string.h>
 #include "commands.h"
 #include "command_parser.h"
+#include "file_processing.h"
 
 int cd(char command[]) {
 	// split into 2 strings by space
-	char** str = split(command, "\\s");
+	char** str = split(command, " \t");
 
 	if (str[1])
 		return chdir(str[1]);
@@ -23,7 +24,7 @@ void echo(char command[]) {
 	char** arr = split(command, "\"");
 
 	// split the first part by space
-	char** no_quotes = split(arr[0], "\\s");
+	char** no_quotes = split(arr[0], " \t");
 
 	// append the first part (without quotes) to handled message without echo
 	int i = 1;
@@ -68,4 +69,18 @@ void cmd_no_path(char** command) {
 		// execute the command with current directory
 		execv(dir_copy, command);
 	}
+}
+
+void print_history() {
+	FILE* file = get_history_file();
+
+	char* str = malloc(512);
+
+	while (fgets(str, 512, file)) {
+		printf("%s", str);
+	}
+
+	fclose(file);
+	if (str)
+		free(str);
 }

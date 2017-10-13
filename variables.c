@@ -12,9 +12,17 @@ char* command_lookup(char command[]) {
 	for (old_index = 0; old_index < strlen(command); old_index++) {
 		char curr_char = command[old_index];
 
-		// if there is '$' lookup and put the new value
+		// if there is '~' , then replace it by $HOME
+		if (curr_char == '~') {
+			char* value = getenv("HOME");
+			// append the new value to the new str
+			if (value) {
+				strcat(new_str, value);
+			}
+		}
+		// if there is '$' , then lookup and put the new value
 		// else put the old char in the new char array
-		if (curr_char == '$') {
+		else if (curr_char == '$') {
 			char* var = malloc(20);
 			memset(var, 0, 20);
 
