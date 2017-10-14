@@ -61,9 +61,28 @@ char* command_lookup(char command[]) {
 }
 
 void set_variable(char expression[]) {
-	// split the expression to key and value
+	// split the command by '='
 	char** arr = split(expression, "=");
 
+	char* value = arr[1];
+	// remove double quotes from value
+	if (value[0] == '\"')
+		value++;
+	if (value[strlen(value) - 1] == '\"')
+		value[strlen(value) - 1] = '\0';
+
+	// split the command before '=' by space to get "export" (if found) and the key
+	arr = split(arr[0], " \t");
+
+	char* key;
+
+	// "export" is found
+	if (arr[1]) {
+		key = arr[1];
+	} else {
+		key = arr[0];
+	}
+
 	// set the key with the new value
-	setenv(arr[0], arr[1], 1);
+	setenv(key, value, 1);
 }

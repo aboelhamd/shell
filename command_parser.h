@@ -11,4 +11,7 @@ char** split(char str[], char delimiter[]);
 // in foreground or background
 int is_foreground(char command[]);
 
+// method to remove '&' from the command
+void remove_and(char* str);
+
 #endif // COMMAND_PARSER_H

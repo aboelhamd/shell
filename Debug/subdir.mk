@@ -12,6 +12,15 @@ C_SRCS += \
 ../main.c \
 ../variables.c 
 
+O_SRCS += \
+../command_parser.o \
+../commands.o \
+../constants.o \
+../environment.o \
+../file_processing.o \
+../main.o \
+../variables.o 
+
 OBJS += \
 ./command_parser.o \
 ./commands.o \

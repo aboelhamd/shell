@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <wait.h>
+#include <signal.h>
 #include "command_parser.h"
 #include "constants.h"
 #include "environment.h"
@@ -14,55 +15,87 @@ typedef enum {
 	false = 0, true = 1
 } bool;
 
-void start(bool read_from_file);
-
 void shell_loop(bool input_from_file, char line[512]);
+
+void write_in_log(int sig);
 
 int main(int argc, char *argv[]) {
 	setup_environment();
-	bool input_from_file = false;
-	char line[512];
+	// receive child signal to write to log
+	signal(SIGCHLD, write_in_log);
 
-	shell_loop(input_from_file, line);
-
-	return 0;
-}
-
-void start(bool read_from_file) {
-	cd(""); // let shell starts from home
-
-	if (read_from_file) {
-		// file processing functions should be called from here
-
-//		shell_loop(true);
-	} else {
-//		shell_loop(false);
+	bool input_from_file = argc > 1;
+	char* batch_path = "";
+	if (input_from_file) {
+		batch_path = argv[1];
 	}
+
+	shell_loop(input_from_file, batch_path);
 }
 
-void shell_loop(bool input_from_file, char line[512]) {
+void write_in_log(int sig) {
+	// reset signal
+	signal(SIGCHLD, write_in_log);
+	write_to_log("Child process is terminated");
+}
+
+void shell_loop(bool input_from_file, char* batch_path) {
+	// let shell starts from home
+	cd("");
 
 	bool from_file = input_from_file;
+
+	// command line
+	char line[512];
+
+	// batch file
+	FILE* batch = get_commands_batch_file(batch_path);
+	// if batch file is not found
+	if (!batch) {
+		printf("There is no batch file in the given path\n");
+		from_file = false;
+	}
 
 	while (true) {
 		if (from_file) {
 			//read next instruction from file
+			//if there is no more lines , close the file
+			if (fgets(line, 512, batch)) {
+				// remove the '\n' from the line
+				if (line[strlen(line) - 1] == '\n')
+					line[strlen(line) - 1] = '\0';
 
-			// if end of file {from_file = false; continue;}
+				printf("%s\n", line);
+			} else {
+				fclose(batch);
+				from_file = false;
+				continue;
+			}
 		} else {
 			//read next instruction from console
-			printf("shell : ");
+			printf("shell> ");
 			if (fgets(line, 512, stdin)) {
 				line[strcspn(line, "\n")] = 0;
+			} else {
+				exit(0);
 			}
 		}
 
-//		printf("Hello\n");
+		// if input is blank , ignore and start again
+		if (strlen(line) == 0) {
+			continue;
+		}
 		// add command to history
 		write_to_history(line);
 
 		// get command type
 		int cmdType = get_cmd_type(line);
+		// is the command in foreground or background
+		int foreground = is_foreground(line);
+
+		// remove '&' if background
+		if (!foreground)
+			remove_and(line);
 
 		if (cmdType == TYPE_EXIT) {
 			// exit
@@ -77,6 +110,7 @@ void shell_loop(bool input_from_file, char line[512]) {
 			char* new_line = command_lookup(line);
 
 			if (cmdType == TYPE_EXPRESSION) {
+				printf("%s\n", new_line);
 				set_variable(new_line);
 			} else if (cmdType == TYPE_CD) {
 				cd(new_line);
@@ -89,9 +123,10 @@ void shell_loop(bool input_from_file, char line[512]) {
 
 				child_pid = fork();
 				if (child_pid == 0) {
-					// This is done by the child process
+					// writing to log
+					write_to_log("Child process is created");
 
-					// split the line by space
+					//split the line by space
 					char ** command = split(new_line, " \t");
 
 					if (cmdType == TYPE_CMD_PATH) {
@@ -99,21 +134,13 @@ void shell_loop(bool input_from_file, char line[512]) {
 					} else if (cmdType == TYPE_CMD) {
 						cmd_no_path(command);
 					}
-
-					printf("Unknown command\n");
-					exit(0);
 				} else {
-					// This is run by the parent.  Wait for the child
-					// to terminate
-
-					pid_t tpid;
-					do {
-						tpid = wait(&child_status);
-						//if(tpid != child_pid) process_terminated(tpid);
-					} while (tpid != child_pid);
-
-					printf("child has finished\n");
-					//return child_status;
+					if (foreground) {
+						pid_t tpid;
+						do {
+							tpid = wait(&child_status);
+						} while (tpid != child_pid);
+					}
 				}
 			}
 		}

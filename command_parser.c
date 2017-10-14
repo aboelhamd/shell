@@ -48,7 +48,8 @@ int is_foreground(char command[]) {
 }
 
 int is_exp(char command[]) {
-	char* regex_str = "^[a-zA-Z_][a-zA-Z0-9_]*=[a-zA-Z0-9_]+(\\s+&)?$";
+	char* regex_str =
+			"^(\\s*(export)?\\s*[a-zA-Z_][a-zA-Z0-9_]*=((([a-zA-Z0-9_])+)|(\"\\s*([a-zA-Z0-9_ -/])*\\s*\"))\\s*&?\\s*)$";
 
 	return matches(regex_str, command);
 }
@@ -72,13 +73,13 @@ int is_echo(char command[]) {
 }
 
 int is_history(char command[]) {
-	char* regex_str = "^\\s*history\\s*$";
+	char* regex_str = "^\\s*history\\s*&?\\s*$";
 
 	return matches(regex_str, command);
 }
 
 int is_exit(char command[]) {
-	char* regex_str = "^\\s*exit\\s*$";
+	char* regex_str = "^\\s*exit\\s*&?\\s*$";
 
 	return matches(regex_str, command);
 }
@@ -109,20 +110,19 @@ int get_cmd_type(char command[]) {
 	}
 }
 
-//char** clean_command(char command[], int cmdType, int foreground) {
-//
-//	char** res = split(command, " ");
-//
-//	// if & found , remove it
-//	if (!foreground) {
-//		// make the last string null
-//		res[sizeof res * 4 / sizeof res[0] - 2] = '\0';
-//	}
-//
-//	if ((cmdType == TYPE_CD) | (cmdType == TYPE_ECHO)) {
-//		res++;
-//	}
-//
-//	return res;
-//}
+void remove_and(char* str) {
+	for (int i = strlen(str) - 1; i >= 0; i--) {
+		char curr_char = str[i];
 
+		str[i] = '\0';
+		if (curr_char == '&') {
+			break;
+		}
+	}
+
+}
+
+//int main(int argc, char **argv) {
+//	printf("%d\n", is_exp("x=\"-l -a\""));
+//	return 0;
+//}
