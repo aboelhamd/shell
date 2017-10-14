@@ -86,3 +86,10 @@ void set_variable(char expression[]) {
 	// set the key with the new value
 	setenv(key, value, 1);
 }
+
+//int main(int argc, char **argv) {
+//	char str[] = "x=\"  5   f    \"";
+//	set_variable(str);
+//	printf("%s\n", getenv("x"));
+//	return 0;
+//}

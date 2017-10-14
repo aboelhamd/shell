@@ -88,14 +88,17 @@ void shell_loop(bool input_from_file, char* batch_path) {
 		// add command to history
 		write_to_history(line);
 
+		// do lookup
+		char* new_line = command_lookup(line);
+
 		// get command type
-		int cmdType = get_cmd_type(line);
+		int cmdType = get_cmd_type(new_line);
 		// is the command in foreground or background
-		int foreground = is_foreground(line);
+		int foreground = is_foreground(new_line);
 
 		// remove '&' if background
 		if (!foreground)
-			remove_and(line);
+			remove_and(new_line);
 
 		if (cmdType == TYPE_EXIT) {
 			// exit
@@ -106,11 +109,7 @@ void shell_loop(bool input_from_file, char* batch_path) {
 			print_history();
 		} else {
 
-			// do lookup
-			char* new_line = command_lookup(line);
-
 			if (cmdType == TYPE_EXPRESSION) {
-				printf("%s\n", new_line);
 				set_variable(new_line);
 			} else if (cmdType == TYPE_CD) {
 				cd(new_line);

@@ -1,0 +1,72 @@
+ls
+cd ~/Desktop
+pwd
+ls
+pwd
+clear
+cd ~
+pwd
+ls
+cd ~/Desktop
+pwd
+cd ..
+pwd
+bc
+x=5
+x=5
+echo $x
+echo test$x
+y=$x
+echo $y
+y=$x
+x=5
+y=$x
+x=5
+x=$HOME
+x=$HOME
+x=$HOME
+x=$HOME
+x=/h
+x=$HOME
+x=$HOME
+x=$PATH
+echo $x
+x=$HOME
+echo $x
+x=$PATH
+echo $x
+x=$HOME
+echo $x
+x=$HOME
+x="$HOME"
+echo $x
+x="$HOME"
+echo $x
+echo $y
+x=$HOME
+echo $x
+y=$x
+x=$PATH
+echo $x
+x=5
+echo $x
+x="5"
+echo $x
+y=$x
+echo $y
+x=$HOME
+echo $x
+cd $x
+pwd
+x="hello    world"
+echo $x
+clear
+x="-l -a"
+ls $x
+vim
+gedit $
+gedit
+gedit &
+gedit &
+clear
+gedit &

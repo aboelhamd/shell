@@ -48,8 +48,8 @@ int is_foreground(char command[]) {
 }
 
 int is_exp(char command[]) {
-	char* regex_str =
-			"^(\\s*(export)?\\s*[a-zA-Z_][a-zA-Z0-9_]*=((([a-zA-Z0-9_])+)|(\"\\s*([a-zA-Z0-9_ -/])*\\s*\"))\\s*&?\\s*)$";
+	char* regex_str = "(export)|(=)";
+//			"^(\\s*(export)?\\s*[a-zA-Z_][a-zA-Z0-9_]*=((([a-zA-Z0-9_-/:])+)|(\".*\"))\\s*&?\\s*)$";
 
 	return matches(regex_str, command);
 }
