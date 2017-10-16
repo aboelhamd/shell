@@ -1,0 +1,45 @@
+					Shell project
+
+1) Code Organization :
+
+* Command parser : - contains methods to parse the command line . methods to split the command , to declare type of the command & declare if it in the background or foreground .
+- I uses regular expression to parse the commands
+
+* Commands : - contains the non built-in commands' implementation . the methods are cd , echo , command without its path and print history
+
+* Constants : - contains commands types as constant ints .
+
+* environment : - setup the environment for 3 paths . the project path , the history file path and the log file path .
+
+* file_processing : - contains methods for handling log , history and batch files . 
+
+* variables : - contains methods for handling variables . one method for lookup and the other for setting the variable .
+
+* main : - combining all these parts in one main part . takes input , execute it and display the result .
+
+
+
+
+
+2) Main Functions :
+
+* split : - helper method used a lot by other method to split the command with certain delimiter into an array of strings .
+
+* set_variable : - set the given variable by using setenv() method which saves it in the current session variables' table .
+
+* command_lookup : - take the command and lookup for the variables in it , then return new string with the new values of variables .
+
+* shell_loop : - it reads one line at a time from stdin or from batch file to execute it in background or foreground in a child process to the parent one and displays the result for the command if any .
+
+* file_processing methods : - they allow wrtiting to log and history files .
+- they allow returning of log , history , batch files .
+
+* cmd_no_path : - execute the command given without path by typically taking the PATH variable and split it into directories and trying to execute it until it executes or the directories end .
+
+
+
+
+3) Compile and run the code :
+ - compiling the code is simply by going to the project directory and type the command make , wich will eventually compile the code . 
+ - running the code is by typing (./shell) to run it in the interactive mode or 
+   (./shell batch_file_path) to run it in the batch mode .
